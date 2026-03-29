@@ -31,10 +31,10 @@ const SignupForm = ({ onSwitch }) => {
         return (
             <div className="flex flex-col gap-4 text-center py-8">
                 <div className="text-4xl">📬</div>
-                <h2 className="text-xl font-bold text-gray-800 tracking-tight">Check your email</h2>
-                <p className="text-sm text-gray-400 leading-relaxed">
+                <h2 className="text-xl font-bold text-[#b0aea5] tracking-tight">Check your email</h2>
+                <p className="text-sm text-[#b0aea5] leading-relaxed">
                 We sent a confirmation link to{' '}
-                <span className="font-medium text-gray-600">{email}</span>
+                <span className="font-medium text-[#b0aea5]">{email}</span>
                 </p>
             </div>
             )
