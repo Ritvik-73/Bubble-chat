@@ -1,16 +1,25 @@
-import MessageBubble from './MessageBubble'
+import { useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
-
-const dummyMessages = [
-  { id: 1, sender_name: 'Bubble AI', content: 'Hey! I am Bubble AI. Ask me anything and I will help you out.', is_ai: true, created_at: '10:01' },
-  { id: 2, sender_name: 'Kivtir73', content: 'What is the weather like on Mars?', is_ai: false, sender_id: 'me', created_at: '10:02' },
-  { id: 3, sender_name: 'Bubble AI', content: 'Mars averages −60°C, with thin CO₂ atmosphere and frequent dust storms. Not great for a picnic!', is_ai: true, created_at: '10:02' },
-  { id: 4, sender_name: 'Alex', content: 'Haha that is wild 😄', is_ai: false, sender_id: 'other', created_at: '10:03' },
-  { id: 5, sender_name: 'Kivtir73', content: 'Right?! 😂', is_ai: false, sender_id: 'me', created_at: '10:03' },
-]
+import useMessages from '../../hooks/useMessages'
+import MessageBubble from './MessageBubble'
 
 const MessageList = () => {
   const { user } = useAuth()
+  const { messages, loading } = useMessages()
+  const bottomRef = useRef(null)
+
+  // Auto scroll to bottom when new message arrives
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center" style={{ background: '#30302e' }}>
+        <p className="text-sm" style={{ color: '#8f8e86' }}>Loading messages...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 overflow-y-auto flex flex-col gap-3 px-5 py-4" style={{ background: '#30302e' }}>
@@ -22,13 +31,24 @@ const MessageList = () => {
         </span>
       </div>
 
-      {dummyMessages.map((msg) => (
+      {/* Empty state */}
+      {messages.length === 0 && (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-sm" style={{ color: '#8f8e86' }}>No messages yet. Say hello! 👋</p>
+        </div>
+      )}
+
+      {/* Real messages */}
+      {messages.map((msg) => (
         <MessageBubble
           key={msg.id}
           message={msg}
-          isOwn={msg.sender_id === 'me'}
+          isOwn={msg.sender_id === user?.id}
         />
       ))}
+
+      {/* Invisible div at bottom for auto scroll */}
+      <div ref={bottomRef} />
 
     </div>
   )

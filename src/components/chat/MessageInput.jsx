@@ -1,12 +1,29 @@
 import { useState } from 'react'
+import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../context/AuthContext'
 
 const MessageInput = () => {
   const [message, setMessage] = useState('')
+  const [sending, setSending] = useState(false)
+  const { user } = useAuth()
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!message.trim()) return
-    console.log('Sending:', message)
-    setMessage('')
+    setSending(true)
+
+    const { error } = await supabase
+      .from('messages')
+      .insert({
+        sender_id: user.id,
+        sender_name: user.user_metadata?.username || user.email,
+        content: message.trim(),
+        is_ai: false,
+      })
+
+    if (error) console.error('Error sending message:', error)
+    else setMessage('')
+
+    setSending(false)
   }
 
   const handleKeyDown = (e) => {
@@ -17,19 +34,24 @@ const MessageInput = () => {
   }
 
   return (
-    <div className="flex items-center gap-3 px-5  shrink-0" style={{ background: '#272724', borderTop: '0.5px solid #8f8e86', height: '57px'}}>
+    <div
+      className="flex items-center gap-3 px-5 shrink-0"
+      style={{ background: '#272724', borderTop: '0.5px solid #8f8e86', height: '57px' }}
+    >
       <input
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
+        placeholder="Type a bubble..."
+        disabled={sending}
         className="flex-1 rounded-3xl px-4 py-2 text-sm outline-none"
         style={{ background: '#3e3e3b', border: '0.5px solid #8f8e86', color: '#b0aea5' }}
       />
       <button
         onClick={handleSend}
-        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-opacity hover:opacity-80"
+        disabled={sending || !message.trim()}
+        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-opacity hover:opacity-80 disabled:opacity-40"
         style={{ background: '#1D9E75' }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">

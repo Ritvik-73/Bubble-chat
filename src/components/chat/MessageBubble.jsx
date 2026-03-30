@@ -18,7 +18,7 @@ const MessageBubble = ({ message, isOwn }) => {
 
       {/* Avatar */}
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0 mb-1"
+        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0 mb-1"
         style={getAvatarStyle()}
       >
         {message.is_ai ? 'AI' : getInitials(message.sender_name)}
@@ -46,7 +46,7 @@ const MessageBubble = ({ message, isOwn }) => {
 
         {/* Time */}
         <span className="text-xs mt-1 px-1" style={{ color: '#8f8e86' }}>
-          {message.created_at}
+          {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
 
