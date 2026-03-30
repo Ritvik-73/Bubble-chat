@@ -43,7 +43,7 @@ const MessageList = () => {
         <MessageBubble
           key={msg.id}
           message={msg}
-          isOwn={msg.sender_id === user?.id}
+          isOwn={msg.sender_id === user?.id && !msg.is_ai}
         />
       ))}
 

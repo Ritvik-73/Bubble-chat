@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { askGemini } from '../../lib/gemini'
 
 const MessageInput = () => {
   const [message, setMessage] = useState('')
@@ -11,6 +12,9 @@ const MessageInput = () => {
     if (!message.trim()) return
     setSending(true)
 
+    const isAiTrigger = message.toLowerCase().startsWith('@ai')
+
+    // Insert user's message first
     const { error } = await supabase
       .from('messages')
       .insert({
@@ -20,8 +24,29 @@ const MessageInput = () => {
         is_ai: false,
       })
 
-    if (error) console.error('Error sending message:', error)
-    else setMessage('')
+    if (error) {
+      console.error('Error sending message:', error)
+      setSending(false)
+      return
+    }
+
+    setMessage('')
+
+    // If message starts with @ai, call Gemini
+    if (isAiTrigger) {
+      const prompt = message.slice(3).trim()
+
+      const aiReply = await askGemini(prompt)
+
+      await supabase
+        .from('messages')
+        .insert({
+          sender_id: user.id,
+          sender_name: 'Bubble AI',
+          content: aiReply,
+          is_ai: true,
+        })
+    }
 
     setSending(false)
   }
@@ -43,7 +68,7 @@ const MessageInput = () => {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a bubble..."
+        placeholder="Type a message... or @ai to ask AI"
         disabled={sending}
         className="flex-1 rounded-3xl px-4 py-2 text-sm outline-none"
         style={{ background: '#3e3e3b', border: '0.5px solid #8f8e86', color: '#b0aea5' }}
@@ -54,10 +79,14 @@ const MessageInput = () => {
         className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-opacity hover:opacity-80 disabled:opacity-40"
         style={{ background: '#1D9E75' }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
+        {sending ? (
+          <div className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        )}
       </button>
     </div>
   )
