@@ -14,7 +14,7 @@ const MessageBubble = ({ message, isOwn }) => {
   }
 
   return (
-    <div className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+    <div className={`message-animate flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
 
       {/* Avatar */}
       <div

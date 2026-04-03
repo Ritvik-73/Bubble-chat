@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { askGemini } from '../../lib/gemini'
+import useTyping from '../../hooks/useTyping'
+
 
 const MessageInput = ({ roomId, selectedUser }) => {
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const { user } = useAuth()
+  const { sendTyping } = useTyping(roomId, user)
 
   const handleSend = async () => {
     if (!message.trim()) return
@@ -52,6 +55,11 @@ const MessageInput = ({ roomId, selectedUser }) => {
     setSending(false)
   }
 
+  const handleChange = (e) => {
+    setMessage(e.target.value)
+    sendTyping()
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -73,7 +81,7 @@ const MessageInput = ({ roomId, selectedUser }) => {
       <input
         type="text"
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={getPlaceholder()}
         disabled={sending}
