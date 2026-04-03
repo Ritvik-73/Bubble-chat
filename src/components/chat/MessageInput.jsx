@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { askGemini } from '../../lib/gemini'
 
-const MessageInput = () => {
+const MessageInput = ({ roomId, selectedUser }) => {
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const { user } = useAuth()
@@ -12,9 +12,8 @@ const MessageInput = () => {
     if (!message.trim()) return
     setSending(true)
 
-    const isAiTrigger = message.toLowerCase().startsWith('@ai')
+    const isAiTrigger = message.toLowerCase().startsWith('@ai') || selectedUser === 'ai'
 
-    // Insert user's message first
     const { error } = await supabase
       .from('messages')
       .insert({
@@ -22,6 +21,7 @@ const MessageInput = () => {
         sender_name: user.user_metadata?.username || user.email,
         content: message.trim(),
         is_ai: false,
+        room_id: roomId
       })
 
     if (error) {
@@ -32,10 +32,10 @@ const MessageInput = () => {
 
     setMessage('')
 
-    // If message starts with @ai, call Gemini
     if (isAiTrigger) {
-      const prompt = message.slice(3).trim()
-
+      const prompt = selectedUser === 'ai'
+        ? message.trim()
+        : message.slice(3).trim()
       const aiReply = await askGemini(prompt)
 
       await supabase
@@ -45,6 +45,7 @@ const MessageInput = () => {
           sender_name: 'Bubble AI',
           content: aiReply,
           is_ai: true,
+          room_id: roomId
         })
     }
 
@@ -58,6 +59,12 @@ const MessageInput = () => {
     }
   }
 
+  const getPlaceholder = () => {
+    if (selectedUser === 'ai') return 'Ask Bubble AI anything...'
+    if (selectedUser === 'general') return 'Message #general... or @ai to ask AI'
+    return `Message ${selectedUser?.username || 'user'}... or @ai to ask AI`
+  }
+
   return (
     <div
       className="flex items-center gap-3 px-5 shrink-0"
@@ -68,7 +75,7 @@ const MessageInput = () => {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message... or @ai to ask AI"
+        placeholder={getPlaceholder()}
         disabled={sending}
         className="flex-1 rounded-3xl px-4 py-2 text-sm outline-none"
         style={{ background: '#3e3e3b', border: '0.5px solid #8f8e86', color: '#b0aea5' }}
