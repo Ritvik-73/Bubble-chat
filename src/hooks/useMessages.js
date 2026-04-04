@@ -25,25 +25,38 @@ const useMessages = (roomId = 'general') => {
     fetchMessages()
 
     const channel = supabase
-      .channel(`messages-${roomId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `room_id=eq.${roomId}`
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new])
-        }
-      )
-      .subscribe()
+    .channel(`messages-${roomId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `room_id=eq.${roomId}`
+      },
+      (payload) => {
+        setMessages((prev) => [...prev, payload.new])
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'messages',
+      },
+      (payload) => {
+        setMessages((prev) => prev.filter((msg) => msg.id !== payload.old.id))
+      }
+    )
+    .subscribe()
 
     return () => supabase.removeChannel(channel)
   }, [roomId])
 
   return { messages, loading }
 }
+
+
 
 export default useMessages
