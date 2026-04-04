@@ -1,15 +1,38 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { askGemini } from '../../lib/gemini'
 import useTyping from '../../hooks/useTyping'
-
+import EmojiPicker from 'emoji-picker-react'
 
 const MessageInput = ({ roomId, selectedUser }) => {
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
+  const [showEmoji, setShowEmoji] = useState(false)
   const { user } = useAuth()
   const { sendTyping } = useTyping(roomId, user)
+  const emojiRef = useRef(null)
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target)) {
+        setShowEmoji(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleChange = (e) => {
+    setMessage(e.target.value)
+    sendTyping()
+  }
+
+  const handleEmojiClick = (emojiData) => {
+    setMessage(prev => prev + emojiData.emoji)
+    setShowEmoji(false)
+  }
 
   const handleSend = async () => {
     if (!message.trim()) return
@@ -36,9 +59,7 @@ const MessageInput = ({ roomId, selectedUser }) => {
     setMessage('')
 
     if (isAiTrigger) {
-      const prompt = selectedUser === 'ai'
-        ? message.trim()
-        : message.slice(3).trim()
+      const prompt = selectedUser === 'ai' ? message.trim() : message.slice(3).trim()
       const aiReply = await askGemini(prompt)
 
       await supabase
@@ -53,11 +74,6 @@ const MessageInput = ({ roomId, selectedUser }) => {
     }
 
     setSending(false)
-  }
-
-  const handleChange = (e) => {
-    setMessage(e.target.value)
-    sendTyping()
   }
 
   const handleKeyDown = (e) => {
@@ -75,9 +91,39 @@ const MessageInput = ({ roomId, selectedUser }) => {
 
   return (
     <div
-      className="flex items-center gap-3 px-5 shrink-0"
+      className="flex items-center gap-3 px-5 shrink-0 relative"
       style={{ background: '#272724', borderTop: '0.5px solid #8f8e86', height: '57px' }}
     >
+      {/* Emoji picker */}
+      {showEmoji && (
+        <div
+          ref={emojiRef}
+          className="absolute bottom-16 left-4 z-50"
+        >
+          <EmojiPicker
+            onEmojiClick={handleEmojiClick}
+            theme="dark"
+            skinTonesDisabled
+            searchDisabled={false}
+            width={300}
+            height={380}
+          />
+        </div>
+      )}
+
+      {/* Emoji button */}
+      <button
+        onClick={() => setShowEmoji(prev => !prev)}
+        className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b0aea5" strokeWidth="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
+          <line x1="9" y1="9" x2="9.01" y2="9"/>
+          <line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </button>
+
       <input
         type="text"
         value={message}
@@ -88,6 +134,7 @@ const MessageInput = ({ roomId, selectedUser }) => {
         className="flex-1 rounded-3xl px-4 py-2 text-sm outline-none"
         style={{ background: '#3e3e3b', border: '0.5px solid #8f8e86', color: '#b0aea5' }}
       />
+
       <button
         onClick={handleSend}
         disabled={sending || !message.trim()}
