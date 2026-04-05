@@ -141,7 +141,7 @@ const Sidebar = ({ onSelectUser, selectedUser }) => {
           onMouseEnter={(e) => e.currentTarget.style.background = '#3e3e3b'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#272724'}
         >
-          <div className="w-7 h-7 rounded-full flex-shrink-0 overflow-hidden" style={{ background: '#1D9E75' }}>
+          <div className="w-7 h-7 rounded-full shrink-0 overflow-hidden" style={{ background: '#1D9E75' }}>
             {user?.user_metadata?.avatar_url ? (
               <img src={user.user_metadata.avatar_url} alt="avatar" className="w-full h-full object-cover" />
             ) : (
