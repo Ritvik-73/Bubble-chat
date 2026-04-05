@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import Sidebar from '../components/chat/sidebar.jsx'
+import Sidebar from '../components/chat/Sidebar.jsx'
 import ChatHeader from '../components/chat/ChatHeader'
 import MessageList from '../components/chat/MessageList'
 import MessageInput from '../components/chat/MessageInput'

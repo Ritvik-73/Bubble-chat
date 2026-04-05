@@ -39,7 +39,7 @@ const AuthPage = () => {
       <div className="relative z-0 w-full lg:w-2/3 bg-[#30302e] p-8 lg:p-16 flex flex-col justify-center items-center h-full">
         <div className="max-w-sm w-full mx-auto">
           
-          {/* Mobile-only Branding (Optional: shows logo when sidebar is gone) */}
+          {/* Mobile-only Branding (Optional: shows logo when Sidebar is gone) */}
           <div className="lg:hidden mb-12 text-center">
              <h1 className="text-white text-3xl font-medium tracking-tight">Bubble Chat</h1>
              <p className="text-[#b0aea5] text-sm mt-2">Sign in to continue</p>
