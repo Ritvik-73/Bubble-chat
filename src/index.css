@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@custom-media --mobile (max-width: 430px);
 
 @keyframes fadeSlideIn {
   from {
