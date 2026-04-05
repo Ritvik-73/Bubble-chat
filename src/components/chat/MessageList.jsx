@@ -1,18 +1,25 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import useTyping from '../../hooks/useTyping'
 import useMessages from '../../hooks/useMessages'
+import useTyping from '../../hooks/useTyping'
 import MessageBubble from './MessageBubble'
 
 const MessageList = ({ roomId, selectedUser }) => {
   const { user } = useAuth()
-  const { messages, loading } = useMessages(roomId)
-  const { typingUsers } = useTyping(roomId,user)
+  const { messages, loading, markAsSeen } = useMessages(roomId)
+  const { typingUsers } = useTyping(roomId, user)
   const bottomRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Mark messages as seen when room opens or new messages arrive
+  useEffect(() => {
+    if (user?.id && roomId) {
+      markAsSeen(roomId, user.id)
+    }
+  }, [messages, roomId, user?.id])
 
   if (loading) {
     return (
@@ -50,7 +57,6 @@ const MessageList = ({ roomId, selectedUser }) => {
         />
       ))}
 
-      {/* Typing indicator */}
       {typingUsers.length > 0 && (
         <div className="flex items-center gap-2 px-1">
           <div className="flex gap-1">

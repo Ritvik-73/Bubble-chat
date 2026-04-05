@@ -67,7 +67,7 @@ const SignupForm = ({ onSwitch }) => {
                 <div className="flex flex-col gap-2">
                     <p className="text-lg font-semibold text-[#b0aea5]">PASSWORD</p>
                     <input type="password"
-                    placeholder="Enter your Password"
+                    placeholder="Create a new Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-3 rounded-lg border border-[#b0aea5] text-lg text-[#b0aea5] outline-none focus-border-[#1D9E75] "

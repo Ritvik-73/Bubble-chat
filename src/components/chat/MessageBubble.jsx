@@ -251,9 +251,33 @@ const MessageBubble = ({ message, isOwn }) => {
             </div>
           )}
 
-          <span className="text-xs mt-1 px-1" style={{ color: '#8f8e86' }}>
-            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
+          <div className={`flex items-center gap-1 mt-1 px-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
+
+            {/* Read receipts — only for own messages */}
+            {isOwn && (
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+                {/* First tick */}
+                <polyline
+                  points="1,5 4,8 8,2"
+                  stroke={message.seen_by?.length > 0 ? '#1D9E75' : '#8f8e86'}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Second tick */}
+                <polyline
+                  points="5,5 8,8 12,2"
+                  stroke={message.seen_by?.length > 0 ? '#1D9E75' : '#8f8e86'}
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+            <span className="text-xs" style={{ color: '#8f8e86' }}>
+              {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
         </div>
       </div>
     </>
